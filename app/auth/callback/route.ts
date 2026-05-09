@@ -22,63 +22,65 @@ export async function GET(request: Request) {
     console.log('✅ Session exchanged successfully');
     console.log('🔍 Session object:', session ? 'exists' : 'null', 'user:', session?.user?.id);
     
-    // Set session cookies manually
-    if (session) {
-      const cookieStore = cookies();
-      cookieStore.set('sb-access-token', session.access_token, {
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7, // 1 week
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-      });
-      cookieStore.set('sb-refresh-token', session.refresh_token, {
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7, // 1 week
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-      });
-      console.log('🍪 Session cookies set');
-    } else {
+    // Set session cookies using NextResponse redirect
+    let redirectUrl = next;
+    
+    if (!session) {
       console.error('❌ Session is null after exchange');
+      return NextResponse.redirect(new URL('/login?error=no_session', requestUrl.origin));
     }
     
     // Check if member record exists, create if missing (fallback if webhook failed)
-    if (session?.user) {
-      const { data: member } = await supabaseAdmin
-        .from('members')
-        .select('id, profile_completed')
-        .eq('id', session.user.id)
-        .single();
-      
-      console.log('👤 Member check - exists:', !!member, 'profile_completed:', member?.profile_completed);
-      
-      if (!member) {
-        console.log('⚠️ No member record found, creating fallback member');
-        await supabaseAdmin.from('members').insert({
-          id: session.user.id,
-          email: session.user.email,
-          full_name: session.user.user_metadata?.full_name || null,
-          membership_status: 'LOCKED',
-          current_plan_tier: 1,
-          monthly_credit_amount: 0,
-          current_credit_balance: 0,
-          profile_completed: false,
-          member_since: new Date().toISOString(),
-        });
-        console.log('✅ Fallback member created');
-        return NextResponse.redirect(new URL('/complete-profile', requestUrl.origin));
-      } else if (!member.profile_completed) {
-        console.log('📝 Profile not complete, redirecting to /complete-profile');
-        return NextResponse.redirect(new URL('/complete-profile', requestUrl.origin));
-      }
+    const { data: member } = await supabaseAdmin
+      .from('members')
+      .select('id, profile_completed')
+      .eq('id', session.user.id)
+      .single();
+    
+    console.log('👤 Member check - exists:', !!member, 'profile_completed:', member?.profile_completed);
+    
+    if (!member) {
+      console.log('⚠️ No member record found, creating fallback member');
+      await supabaseAdmin.from('members').insert({
+        id: session.user.id,
+        email: session.user.email,
+        full_name: session.user.user_metadata?.full_name || null,
+        membership_status: 'LOCKED',
+        current_plan_tier: 1,
+        monthly_credit_amount: 0,
+        current_credit_balance: 0,
+        profile_completed: false,
+        member_since: new Date().toISOString(),
+      });
+      console.log('✅ Fallback member created');
+      redirectUrl = '/complete-profile';
+    } else if (!member.profile_completed) {
+      console.log('📝 Profile not complete, redirecting to /complete-profile');
+      redirectUrl = '/complete-profile';
     }
+    
+    // Create redirect response with cookies
+    const response = NextResponse.redirect(new URL(redirectUrl, requestUrl.origin));
+    
+    response.cookies.set('sb-access-token', session.access_token, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+    response.cookies.set('sb-refresh-token', session.refresh_token, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+    
+    console.log('🍪 Session cookies set, redirecting to:', redirectUrl);
+    return response;
   } else {
     console.error('❌ No code in callback URL');
     return NextResponse.redirect(new URL('/login?error=no_code', requestUrl.origin));
   }
-
-  console.log('🔄 Redirecting to:', next);
-  return NextResponse.redirect(new URL(next, requestUrl.origin));
 }
