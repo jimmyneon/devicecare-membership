@@ -3,13 +3,19 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import type { Database } from '@/types/database';
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient<Database>({ req, res });
+export default async function middleware(req: NextRequest) {
+  const supabase = createMiddlewareClient<Database>({ req, res: NextResponse.next() });
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  console.log(' Middleware - path:', req.nextUrl.pathname);
+  console.log(' Middleware - has session:', !!session);
+  console.log(' Middleware - session error:', sessionError?.message);
+  console.log(' Middleware - cookies:', req.cookies.getAll().map(c => c.name));
+  
+  if (session) {
+    console.log(' Middleware - user id:', session.user.id);
+    console.log(' Middleware - email:', session.user.email);
+  }
 
   const isAuthRoute = req.nextUrl.pathname.startsWith('/dashboard') ||
     req.nextUrl.pathname.startsWith('/card') ||
