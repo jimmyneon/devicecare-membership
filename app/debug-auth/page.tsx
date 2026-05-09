@@ -67,7 +67,7 @@ export default function DebugAuthPage() {
           {memberData?.error ? (
             <div className="text-red-600">
               <p><strong>Error:</strong> {memberData.error.message}</p>
-              <p className="mt-2 text-sm">This means you don't have a member record in the database yet.</p>
+              <p className="mt-2 text-sm">This means you don&apos;t have a member record in the database yet.</p>
             </div>
           ) : memberData?.member ? (
             <div className="space-y-2">
@@ -95,7 +95,7 @@ export default function DebugAuthPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="font-bold mb-2">What This Means:</h3>
           <ul className="list-disc list-inside space-y-1 text-sm">
-            <li>If you have an auth session but no member record: The webhook hasn't created your member yet</li>
+            <li>If you have an auth session but no member record: The webhook hasn&apos;t created your member yet</li>
             <li>If profile_completed is false: You need to complete your profile at /complete-profile</li>
             <li>If you have no Stripe Customer ID: Payment hasn't been processed yet</li>
           </ul>

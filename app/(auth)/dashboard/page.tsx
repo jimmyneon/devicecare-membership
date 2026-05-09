@@ -67,7 +67,7 @@ export default async function DashboardPage() {
           Welcome back, {member.full_name || 'Member'}!
         </h1>
         <p className="text-forest-600">
-          Here's your membership overview
+          Here&apos;s your membership overview
         </p>
       </div>
 
@@ -252,7 +252,7 @@ export default async function DashboardPage() {
           Member Since {formatDate(member.member_since)}
         </h3>
         <p className="text-sm text-forest-700">
-          You've been a valued DeviceCare member for{' '}
+          You&apos;ve been a valued DeviceCare member for{' '}
           {Math.floor((Date.now() - new Date(member.member_since).getTime()) / (1000 * 60 * 60 * 24 * 30))} months.
           Thank you for your continued support!
         </p>
