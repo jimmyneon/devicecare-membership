@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -10,22 +11,44 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (error) {
       console.error('❌ Failed to exchange code for session:', error);
-      // Redirect to login with error
       return NextResponse.redirect(new URL(`/login?error=${error.message}`, requestUrl.origin));
     }
     
     console.log('✅ Session exchanged successfully');
+    
+    // Check if member record exists, create if missing (fallback if webhook failed)
+    if (session?.user) {
+      const { data: member } = await supabase
+        .from('members')
+        .select('id')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (!member) {
+        console.log('⚠️ No member record found, creating fallback member');
+        await supabaseAdmin.from('members').insert({
+          id: session.user.id,
+          email: session.user.email,
+          full_name: session.user.user_metadata?.full_name || null,
+          membership_status: 'LOCKED', // Will be updated by webhook later
+          current_plan_tier: 1,
+          monthly_credit_amount: 0,
+          current_credit_balance: 0,
+          profile_completed: false,
+          member_since: new Date().toISOString(),
+        });
+        console.log('✅ Fallback member created');
+      }
+    }
   } else {
     console.error('❌ No code in callback URL');
-    // Redirect to login with error
     return NextResponse.redirect(new URL('/login?error=no_code', requestUrl.origin));
   }
 
-  // Redirect to the next page or dashboard
   console.log('🔄 Redirecting to:', next);
   return NextResponse.redirect(new URL(next, requestUrl.origin));
 }
