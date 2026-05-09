@@ -12,7 +12,7 @@ export async function sendWelcomeEmail(
   name: string
 ) {
   try {
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: email,
       subject: 'Welcome to DeviceCare! Complete Your Account Setup',
@@ -74,7 +74,13 @@ export async function sendWelcomeEmail(
       `,
     });
     
-    return { success: true };
+    if (error) {
+      console.error('Resend API error:', error);
+      return { success: false, error };
+    }
+    
+    console.log('Email sent successfully:', data);
+    return { success: true, data };
   } catch (error) {
     console.error('Failed to send welcome email:', error);
     return { success: false, error };
