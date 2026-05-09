@@ -20,6 +20,7 @@ export async function GET(request: Request) {
     }
     
     console.log('✅ Session exchanged successfully');
+    console.log('🔍 Session object:', session ? 'exists' : 'null', 'user:', session?.user?.id);
     
     // Set session cookies manually
     if (session) {
@@ -39,6 +40,8 @@ export async function GET(request: Request) {
         sameSite: 'lax',
       });
       console.log('🍪 Session cookies set');
+    } else {
+      console.error('❌ Session is null after exchange');
     }
     
     // Check if member record exists, create if missing (fallback if webhook failed)
