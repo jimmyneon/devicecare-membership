@@ -177,6 +177,7 @@ function SetupAccountContent() {
       // Update member profile
       const { error: updateError } = await supabase
         .from('members')
+        // @ts-ignore - Supabase type inference issue
         .update({
           ...formData,
           profile_photo_url: photoUrl,

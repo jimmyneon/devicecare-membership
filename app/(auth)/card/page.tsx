@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
 import MembershipCardComponent from '@/components/MembershipCard';
+import type { Database } from '@/types/database';
 
 export default async function MembershipCardPage() {
   const supabase = createClient();
@@ -21,6 +22,10 @@ export default async function MembershipCardPage() {
     redirect('/onboarding');
   }
 
+  // Type assertion to help TypeScript
+  type Member = Database['public']['Tables']['members']['Row'];
+  const typedMember = member as Member;
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
@@ -32,7 +37,7 @@ export default async function MembershipCardPage() {
         </p>
       </div>
 
-      <MembershipCardComponent member={member} />
+      <MembershipCardComponent member={typedMember} />
 
       <div className="mt-8 card bg-forest-50">
         <h3 className="font-semibold text-forest-900 mb-3">
@@ -70,11 +75,11 @@ export default async function MembershipCardPage() {
         <div className="card">
           <h4 className="font-semibold text-forest-900 mb-2">Current Balance</h4>
           <p className="text-2xl font-bold text-forest-900">
-            {formatCurrency(member.current_credit_balance)}
+            {formatCurrency(typedMember.current_credit_balance)}
           </p>
-          {member.negative_balance_limit > 0 && (
+          {typedMember.negative_balance_limit > 0 && (
             <p className="text-sm text-forest-600 mt-1">
-              +{formatCurrency(member.negative_balance_limit)} buffer available
+              +{formatCurrency(typedMember.negative_balance_limit)} buffer available
             </p>
           )}
         </div>
@@ -83,14 +88,14 @@ export default async function MembershipCardPage() {
           <h4 className="font-semibold text-forest-900 mb-2">Membership Status</h4>
           <div className="space-y-1">
             <span className={`badge ${
-              member.membership_status === 'ACTIVE' ? 'badge-success' :
-              member.membership_status === 'GRACE' ? 'badge-warning' :
+              typedMember.membership_status === 'ACTIVE' ? 'badge-success' :
+              typedMember.membership_status === 'GRACE' ? 'badge-warning' :
               'badge-danger'
             }`}>
-              {member.membership_status}
+              {typedMember.membership_status}
             </span>
             <p className="text-sm text-forest-600">
-              Trust Level: <span className="font-medium">{member.trust_tier}</span>
+              Trust Tier: {typedMember.trust_tier || 'NEW'}
             </p>
           </div>
         </div>

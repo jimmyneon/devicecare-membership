@@ -12,24 +12,27 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const { data: member } = await supabase
+  const { data: memberData } = await supabase
     .from('members')
     .select('*')
     .eq('id', session.user.id)
     .single();
 
-  if (!member) {
+  if (!memberData) {
     redirect('/onboarding');
   }
 
-  const { data: recentTransactions } = await supabase
+  // Type assertion to fix Supabase type inference
+  const member = memberData as any;
+
+  const { data: recentTransactionsData } = await supabase
     .from('credit_ledger')
     .select('*')
     .eq('member_id', session.user.id)
     .order('created_at', { ascending: false })
     .limit(5);
 
-  const { data: expiringCredits } = await supabase
+  const { data: expiringCreditsData } = await supabase
     .from('credit_ledger')
     .select('*')
     .eq('member_id', session.user.id)
@@ -38,6 +41,9 @@ export default async function DashboardPage() {
     .gt('remaining_amount', 0)
     .lte('expires_at', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString())
     .order('expires_at', { ascending: true });
+
+  const recentTransactions = recentTransactionsData as any;
+  const expiringCredits = expiringCreditsData as any;
 
   const getStatusBadge = (status: string) => {
     const badges = {
@@ -140,7 +146,7 @@ export default async function DashboardPage() {
                 Credits Expiring Soon
               </h3>
               <p className="text-sm text-yellow-700 mb-2">
-                You have {formatCurrency(expiringCredits.reduce((sum, c) => sum + (c.remaining_amount || 0), 0))} in credits expiring in the next 30 days.
+                You have {formatCurrency(expiringCredits.reduce((sum: number, c: any) => sum + (c.remaining_amount || 0), 0))} in credits expiring in the next 30 days.
               </p>
               <Link href="/dashboard/credits" className="text-sm font-medium text-yellow-900 hover:underline">
                 View details →
@@ -209,7 +215,7 @@ export default async function DashboardPage() {
 
           {recentTransactions && recentTransactions.length > 0 ? (
             <div className="space-y-3">
-              {recentTransactions.map((transaction) => (
+              {recentTransactions.map((transaction: any) => (
                 <div key={transaction.id} className="flex items-center justify-between py-2 border-b border-forest-100 last:border-0">
                   <div>
                     <p className="font-medium text-forest-900 text-sm">

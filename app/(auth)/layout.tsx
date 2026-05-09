@@ -15,11 +15,13 @@ export default async function AuthLayout({
     redirect('/login');
   }
 
-  const { data: member } = await supabase
+  const { data: memberData } = await supabase
     .from('members')
     .select('*')
     .eq('id', session.user.id)
     .single();
+
+  const member = memberData as any;
 
   const handleSignOut = async () => {
     'use server';

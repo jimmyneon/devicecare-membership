@@ -155,6 +155,7 @@ export default function CompleteProfilePage() {
       // Update member profile
       const { error: updateError } = await supabase
         .from('members')
+        // @ts-ignore - Supabase type inference issue
         .update({
           phone: formData.phone,
           address_line1: formData.address_line1,
