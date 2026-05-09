@@ -1,79 +1,67 @@
 import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const next = requestUrl.searchParams.get('next') || '/dashboard';
 
-  console.log('🔗 Auth callback - code:', code ? 'present' : 'missing', 'next:', next);
-
-  if (code) {
-    const supabase = createClient();
-    const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
-    
-    if (error) {
-      console.error('❌ Failed to exchange code for session:', error);
-      return NextResponse.redirect(new URL(`/login?error=${error.message}`, requestUrl.origin));
-    }
-    
-    console.log('✅ Session exchanged successfully');
-    console.log('🔍 Session object:', session ? 'exists' : 'null', 'user:', session?.user?.id);
-    
-    if (!session) {
-      console.error('❌ Session is null after exchange');
-      return NextResponse.redirect(new URL('/login?error=no_session', requestUrl.origin));
-    }
-    
-    // Use setSession to properly set cookies via auth-helpers
-    const { error: setSessionError } = await supabase.auth.setSession({
-      access_token: session.access_token,
-      refresh_token: session.refresh_token,
-    });
-    
-    if (setSessionError) {
-      console.error('❌ Failed to set session:', setSessionError);
-    } else {
-      console.log('✅ Session set via auth-helpers');
-    }
-    
-    // Check if member record exists, create if missing (fallback if webhook failed)
-    const { data: member } = await supabaseAdmin
-      .from('members')
-      .select('id, profile_completed')
-      .eq('id', session.user.id)
-      .single();
-    
-    console.log('👤 Member check - exists:', !!member, 'profile_completed:', member?.profile_completed);
-    
-    let redirectUrl = next;
-    
-    if (!member) {
-      console.log('⚠️ No member record found, creating fallback member');
-      await supabaseAdmin.from('members').insert({
-        id: session.user.id,
-        email: session.user.email,
-        full_name: session.user.user_metadata?.full_name || null,
-        membership_status: 'LOCKED',
-        current_plan_tier: 1,
-        monthly_credit_amount: 0,
-        current_credit_balance: 0,
-        profile_completed: false,
-        member_since: new Date().toISOString(),
-      });
-      console.log('✅ Fallback member created');
-      redirectUrl = '/complete-profile';
-    } else if (!member.profile_completed) {
-      console.log('📝 Profile not complete, redirecting to /complete-profile');
-      redirectUrl = '/complete-profile';
-    }
-    
-    console.log('🔄 Redirecting to:', redirectUrl);
-    return NextResponse.redirect(new URL(redirectUrl, requestUrl.origin));
-  } else {
-    console.error('❌ No code in callback URL');
+  if (!code) {
     return NextResponse.redirect(new URL('/login?error=no_code', requestUrl.origin));
   }
+
+  // Create a simple HTML page that handles the auth on the client side
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Signing in...</title>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script>
+          const supabaseUrl = '${process.env.NEXT_PUBLIC_SUPABASE_URL}';
+          const supabaseAnonKey = '${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}';
+          const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+          
+          async function handleAuth() {
+            try {
+              const { data, error } = await supabase.auth.exchangeCodeForSession('${code}');
+              
+              if (error) {
+                window.location.href = '/login?error=' + encodeURIComponent(error.message);
+                return;
+              }
+              
+              // Check member status via API
+              const response = await fetch('/api/auth/check-member', {
+                credentials: 'include'
+              });
+              const result = await response.json();
+              
+              if (result.redirect) {
+                window.location.href = result.redirect;
+              } else {
+                window.location.href = '${next}';
+              }
+            } catch (err) {
+              window.location.href = '/login?error=auth_failed';
+            }
+          }
+          
+          handleAuth();
+        </script>
+      </head>
+      <body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: system-ui; background: #f5f5f0;">
+        <div style="text-align: center; color: #006B35;">
+          <h2>Signing you in...</h2>
+          <p>Please wait</p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  return new NextResponse(html, {
+    headers: { 'Content-Type': 'text/html' },
+  });
 }
