@@ -21,9 +21,29 @@ export async function GET(request: Request) {
     
     console.log('✅ Session exchanged successfully');
     
+    // Set session cookies manually
+    if (session) {
+      const cookieStore = cookies();
+      cookieStore.set('sb-access-token', session.access_token, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+      });
+      cookieStore.set('sb-refresh-token', session.refresh_token, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+      });
+      console.log('🍪 Session cookies set');
+    }
+    
     // Check if member record exists, create if missing (fallback if webhook failed)
     if (session?.user) {
-      const { data: member } = await supabase
+      const { data: member } = await supabaseAdmin
         .from('members')
         .select('id, profile_completed')
         .eq('id', session.user.id)
@@ -45,6 +65,7 @@ export async function GET(request: Request) {
           member_since: new Date().toISOString(),
         });
         console.log('✅ Fallback member created');
+        return NextResponse.redirect(new URL('/complete-profile', requestUrl.origin));
       } else if (!member.profile_completed) {
         console.log('📝 Profile not complete, redirecting to /complete-profile');
         return NextResponse.redirect(new URL('/complete-profile', requestUrl.origin));
