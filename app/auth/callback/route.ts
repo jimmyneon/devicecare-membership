@@ -1,7 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -9,34 +6,34 @@ export async function GET(request: Request) {
   const next = requestUrl.searchParams.get('next') || '/dashboard';
 
   if (!code) {
-    return NextResponse.redirect(new URL('/login?error=no_code', requestUrl.origin));
+    return NextResponse.redirect(new URL('/login', requestUrl.origin));
   }
 
-  // Exchange code for session using admin client
-  const { data: { session }, error } = await supabaseAdmin.auth.exchangeCodeForSession(code);
+  // Return a client component that handles the auth
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script>
+          const supabaseUrl = '${process.env.NEXT_PUBLIC_SUPABASE_URL}';
+          const supabaseKey = '${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}';
+          const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+          
+          supabase.auth.exchangeCodeForSession('${code}').then(({ data, error }) => {
+            if (error) {
+              window.location.href = '/login?error=' + encodeURIComponent(error.message);
+            } else {
+              window.location.href = '${next}';
+            }
+          });
+        </script>
+      </head>
+      <body>Signing in...</body>
+    </html>
+  `;
 
-  if (error || !session) {
-    return NextResponse.redirect(new URL('/login?error=auth_failed', requestUrl.origin));
-  }
-
-  // Set cookies manually with correct Supabase cookie names
-  const cookieStore = cookies();
-  const cookieName = `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token`;
-  
-  const response = NextResponse.redirect(new URL(next, requestUrl.origin));
-  
-  response.cookies.set(cookieName, JSON.stringify({
-    access_token: session.access_token,
-    refresh_token: session.refresh_token,
-    expires_at: session.expires_at,
-    user: session.user,
-  }), {
-    path: '/',
-    maxAge: 60 * 60 * 24 * 7,
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
+  return new NextResponse(html, {
+    headers: { 'Content-Type': 'text/html' },
   });
-
-  return response;
 }
