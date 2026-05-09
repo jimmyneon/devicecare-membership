@@ -11,13 +11,13 @@ export default async function MembershipCardPage() {
     redirect('/login');
   }
 
-  const { data: member } = await supabase
+  const { data: member, error } = await supabase
     .from('members')
     .select('*')
     .eq('id', session.user.id)
     .single();
 
-  if (!member) {
+  if (!member || error) {
     redirect('/onboarding');
   }
 
