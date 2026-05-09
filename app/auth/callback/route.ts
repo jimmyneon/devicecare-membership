@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -24,9 +25,11 @@ export async function GET(request: Request) {
     if (session?.user) {
       const { data: member } = await supabase
         .from('members')
-        .select('id')
+        .select('id, profile_completed')
         .eq('id', session.user.id)
         .single();
+      
+      console.log('👤 Member check - exists:', !!member, 'profile_completed:', member?.profile_completed);
       
       if (!member) {
         console.log('⚠️ No member record found, creating fallback member');
@@ -34,7 +37,7 @@ export async function GET(request: Request) {
           id: session.user.id,
           email: session.user.email,
           full_name: session.user.user_metadata?.full_name || null,
-          membership_status: 'LOCKED', // Will be updated by webhook later
+          membership_status: 'LOCKED',
           current_plan_tier: 1,
           monthly_credit_amount: 0,
           current_credit_balance: 0,
@@ -42,6 +45,9 @@ export async function GET(request: Request) {
           member_since: new Date().toISOString(),
         });
         console.log('✅ Fallback member created');
+      } else if (!member.profile_completed) {
+        console.log('📝 Profile not complete, redirecting to /complete-profile');
+        return NextResponse.redirect(new URL('/complete-profile', requestUrl.origin));
       }
     }
   } else {
