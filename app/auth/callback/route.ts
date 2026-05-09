@@ -22,12 +22,21 @@ export async function GET(request: Request) {
     console.log('✅ Session exchanged successfully');
     console.log('🔍 Session object:', session ? 'exists' : 'null', 'user:', session?.user?.id);
     
-    // Set session cookies using NextResponse redirect
-    let redirectUrl = next;
-    
     if (!session) {
       console.error('❌ Session is null after exchange');
       return NextResponse.redirect(new URL('/login?error=no_session', requestUrl.origin));
+    }
+    
+    // Use setSession to properly set cookies via auth-helpers
+    const { error: setSessionError } = await supabase.auth.setSession({
+      access_token: session.access_token,
+      refresh_token: session.refresh_token,
+    });
+    
+    if (setSessionError) {
+      console.error('❌ Failed to set session:', setSessionError);
+    } else {
+      console.log('✅ Session set via auth-helpers');
     }
     
     // Check if member record exists, create if missing (fallback if webhook failed)
@@ -38,6 +47,8 @@ export async function GET(request: Request) {
       .single();
     
     console.log('👤 Member check - exists:', !!member, 'profile_completed:', member?.profile_completed);
+    
+    let redirectUrl = next;
     
     if (!member) {
       console.log('⚠️ No member record found, creating fallback member');
@@ -59,26 +70,8 @@ export async function GET(request: Request) {
       redirectUrl = '/complete-profile';
     }
     
-    // Create redirect response with cookies
-    const response = NextResponse.redirect(new URL(redirectUrl, requestUrl.origin));
-    
-    response.cookies.set('sb-access-token', session.access_token, {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 1 week
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    });
-    response.cookies.set('sb-refresh-token', session.refresh_token, {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 1 week
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    });
-    
-    console.log('🍪 Session cookies set, redirecting to:', redirectUrl);
-    return response;
+    console.log('🔄 Redirecting to:', redirectUrl);
+    return NextResponse.redirect(new URL(redirectUrl, requestUrl.origin));
   } else {
     console.error('❌ No code in callback URL');
     return NextResponse.redirect(new URL('/login?error=no_code', requestUrl.origin));
