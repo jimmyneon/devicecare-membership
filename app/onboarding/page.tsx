@@ -87,7 +87,7 @@ export default function OnboardingPage() {
 
         <div className="bg-white rounded-lg p-8 shadow-lg max-w-2xl mx-auto">
           <h3 className="text-xl font-bold text-black mb-4">
-            What's Included
+            What&apos;s Included
           </h3>
           <ul className="space-y-3 mb-6">
             <li className="flex items-start gap-3">

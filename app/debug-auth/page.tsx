@@ -97,7 +97,7 @@ export default function DebugAuthPage() {
           <ul className="list-disc list-inside space-y-1 text-sm">
             <li>If you have an auth session but no member record: The webhook hasn&apos;t created your member yet</li>
             <li>If profile_completed is false: You need to complete your profile at /complete-profile</li>
-            <li>If you have no Stripe Customer ID: Payment hasn't been processed yet</li>
+            <li>If you have no Stripe Customer ID: Payment hasn&apos;t been processed yet</li>
           </ul>
         </div>
 
