@@ -32,31 +32,31 @@ export default async function AuthLayout({
 
   return (
     <div className="min-h-screen bg-cream-100">
-      <nav className="bg-forest-800 text-white shadow-lg">
+      <nav className="bg-cream-100 text-forest-900 shadow-lg border-b border-forest-200">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
-              <Link href="/dashboard" className="text-xl font-bold">
+              <Link href="/dashboard" className="text-xl font-bold text-forest-900">
                 DeviceCare
               </Link>
               <div className="hidden md:flex items-center gap-4">
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-forest-700 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-forest-50 transition-colors text-forest-900"
                 >
                   <Home className="w-4 h-4" />
                   Dashboard
                 </Link>
                 <Link
                   href="/card"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-forest-700 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-forest-50 transition-colors text-forest-900"
                 >
                   <CreditCard className="w-4 h-4" />
                   My Card
                 </Link>
                 <Link
                   href="/settings"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-forest-700 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-forest-50 transition-colors text-forest-900"
                 >
                   <Settings className="w-4 h-4" />
                   Settings
@@ -65,15 +65,15 @@ export default async function AuthLayout({
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right hidden sm:block">
-                <p className="text-sm text-forest-100">{member?.full_name || session.user.email}</p>
-                <p className="text-xs text-forest-300">
+                <p className="text-sm text-forest-900">{member?.full_name || session.user.email}</p>
+                <p className="text-xs text-forest-700">
                   {member?.current_credit_balance ? `£${member.current_credit_balance.toFixed(2)} credit` : 'Member'}
                 </p>
               </div>
               <form action={handleSignOut}>
                 <button
                   type="submit"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-forest-700 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-forest-50 transition-colors text-forest-900"
                 >
                   <LogOut className="w-4 h-4" />
                   <span className="hidden sm:inline">Sign Out</span>
