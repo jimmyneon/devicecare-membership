@@ -6,7 +6,7 @@ import Link from 'next/link';
 import MembershipCardComponent from '@/components/MembershipCard';
 import type { Database } from '@/types/database';
 
-// Dashboard page for customer accounts
+// Dashboard page for customer accounts (v2026-05-11)
 export default async function DashboardPage() {
   console.log('[DASHBOARD] Starting dashboard page load');
   
