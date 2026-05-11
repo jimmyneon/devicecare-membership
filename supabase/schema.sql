@@ -586,14 +586,16 @@ DECLARE
     v_old_limit DECIMAL(10, 2);
     v_new_limit DECIMAL(10, 2);
     v_is_override BOOLEAN;
+    v_plan_tier INTEGER;
+    v_monthly_credit DECIMAL(10, 2);
 BEGIN
-    -- Get current tier
-    SELECT trust_tier, negative_balance_limit, is_trust_override
-    INTO v_old_tier, v_old_limit, v_is_override
+    -- Get current tier and plan info
+    SELECT trust_tier, negative_balance_limit, is_trust_override, current_plan_tier, monthly_credit_amount
+    INTO v_old_tier, v_old_limit, v_is_override, v_plan_tier, v_monthly_credit
     FROM members
     WHERE id = p_member_id;
     
-    -- Skip if manual override
+    -- Don't update if manually overridden
     IF v_is_override THEN
         RETURN;
     END IF;
@@ -601,11 +603,14 @@ BEGIN
     -- Calculate new tier
     v_new_tier := calculate_trust_tier(p_member_id);
     
-    -- Set limit based on tier
+    -- Set limit based on tier AND plan tier (scales with monthly payment)
+    -- NEW members: £0 buffer regardless of plan
+    -- TRUSTED members: 2x their monthly credit
+    -- GOLD members: 3x their monthly credit
     v_new_limit := CASE v_new_tier
         WHEN 'NEW' THEN 0.00
-        WHEN 'TRUSTED' THEN 50.00
-        WHEN 'GOLD' THEN 80.00
+        WHEN 'TRUSTED' THEN v_monthly_credit * 2
+        WHEN 'GOLD' THEN v_monthly_credit * 3
         WHEN 'RESTRICTED' THEN 0.00
     END;
     
