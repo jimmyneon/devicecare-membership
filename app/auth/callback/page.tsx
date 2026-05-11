@@ -18,12 +18,15 @@ function AuthCallbackContent() {
 
     const handleAuth = async () => {
       const supabase = createClient();
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
+        console.error('Auth error:', error);
         router.push(`/login?error=${encodeURIComponent(error.message)}`);
       } else {
+        console.log('Auth successful, redirecting to:', next);
         router.push(next);
+        router.refresh();
       }
     };
 
