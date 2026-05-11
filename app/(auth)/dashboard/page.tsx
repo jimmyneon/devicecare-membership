@@ -28,9 +28,10 @@ export default async function DashboardPage() {
 
   console.log('[DASHBOARD] Member data:', memberData ? 'Found' : 'Not found', 'Error:', memberError);
 
+  // If no member data, something is wrong - should never happen as layout checks this
   if (!memberData) {
-    console.log('[DASHBOARD] No member data, redirecting to onboarding');
-    redirect('/onboarding');
+    console.error('[DASHBOARD] CRITICAL: No member data but passed layout check');
+    redirect('/login');
   }
 
   // Type assertion to fix Supabase type inference
