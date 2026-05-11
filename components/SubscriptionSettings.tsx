@@ -217,10 +217,6 @@ export default function SubscriptionSettings({ member }: SubscriptionSettingsPro
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-600">Trust Tier</span>
-            <span className="font-semibold text-gray-900">{member.trust_tier}</span>
-          </div>
-          <div className="flex items-center justify-between">
             <span className="text-gray-600">Lifetime Credits Earned</span>
             <span className="font-semibold text-gray-900">
               {formatCurrency(member.lifetime_credits_earned)}
@@ -298,9 +294,9 @@ export default function SubscriptionSettings({ member }: SubscriptionSettingsPro
               </p>
               <ul className="text-sm text-red-800 space-y-1 list-disc list-inside">
                 <li>{formatCurrency(member.current_credit_balance)} credit balance</li>
-                <li>Priority service access</li>
-                <li>{member.trust_tier} trust tier status</li>
-                <li>Monthly credit accrual</li>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>Monthly credit accrual</li>
+                </ul>
               </ul>
             </div>
 
