@@ -54,6 +54,10 @@ export async function POST(request: Request) {
         await handlePaymentFailed(event.data.object as Stripe.Invoice);
         break;
 
+      case 'checkout.session.completed':
+        await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+        break;
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
@@ -333,4 +337,64 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
       membership_status: newStatus,
     })
     .eq('id', subscription.member_id);
+}
+
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  // Check if this is a top-up payment
+  if (session.metadata?.type !== 'topup') return;
+
+  const memberId = session.metadata.member_id;
+  const topupAmount = parseFloat(session.metadata.topup_amount || '0');
+
+  if (!memberId || !topupAmount) {
+    console.error('Missing metadata for top-up:', session.metadata);
+    return;
+  }
+
+  console.log('💰 Processing top-up:', {
+    member_id: memberId,
+    amount: topupAmount,
+    payment_intent: session.payment_intent,
+  });
+
+  // Create top-up record
+  const { data: topupRecord, error: topupError } = await supabaseAdmin
+    .from('topups')
+    .insert({
+      member_id: memberId,
+      amount: topupAmount,
+      stripe_payment_intent_id: session.payment_intent as string,
+      payment_status: 'succeeded',
+      completed_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+
+  if (topupError) {
+    console.error('❌ Failed to create top-up record:', topupError);
+    return;
+  }
+
+  // Add credit to member account
+  const { data: creditResult, error: creditError } = await supabaseAdmin.rpc('add_credit', {
+    p_member_id: memberId,
+    p_amount: topupAmount,
+    p_transaction_type: 'TOPUP',
+    p_subscription_id: null,
+    p_stripe_payment_intent_id: session.payment_intent as string,
+    p_notes: `Top-up: £${topupAmount.toFixed(2)}`,
+  });
+
+  if (creditError) {
+    console.error('❌ Failed to add top-up credit:', creditError);
+    return;
+  }
+
+  // Update topup record with ledger ID
+  await supabaseAdmin
+    .from('topups')
+    .update({ credit_ledger_id: creditResult })
+    .eq('id', topupRecord.id);
+
+  console.log('✅ Top-up completed successfully. Ledger ID:', creditResult);
 }

@@ -123,6 +123,19 @@ export default async function DashboardPage() {
         </Link>
 
         <Link
+          href="/topup"
+          className="block bg-white hover:bg-gray-50 border border-gray-200 rounded-xl p-4 transition-colors"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-gray-900">Top Up Credit</p>
+              <p className="text-sm text-gray-600">Add credit for future repairs</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </div>
+        </Link>
+
+        <Link
           href="/settings/plan"
           className="block bg-white hover:bg-gray-50 border border-gray-200 rounded-xl p-4 transition-colors"
         >
