@@ -29,6 +29,11 @@ export default async function AuthLayout({
 
   const member = memberData as any;
 
+  // If profile is incomplete, redirect to complete-profile
+  if (!member.profile_completed) {
+    redirect('/complete-profile');
+  }
+
   const handleSignOut = async () => {
     'use server';
     const supabase = createClient();
