@@ -103,10 +103,10 @@ export default async function DashboardPage() {
               </summary>
               <div className="mt-2 p-3 bg-blue-50 rounded-lg text-blue-900">
                 <p className="mb-2">
-                  <strong>Good news!</strong> You can use up to <strong>{formatCurrency(member.negative_balance_limit)}</strong> more than your balance for repairs.
+                  <strong>You may be able to use up to {formatCurrency(member.negative_balance_limit)} more</strong> than your current balance.
                 </p>
                 <p className="text-xs text-blue-700">
-                  This is our way of trusting you as a loyal member. Just pay it back with your next monthly credit.
+                  This is subject to staff approval at the time of repair. As a loyal member, we can often help you out when you need it.
                 </p>
               </div>
             </details>
