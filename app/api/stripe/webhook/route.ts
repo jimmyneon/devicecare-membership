@@ -127,7 +127,7 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription, isNew
     stripe_subscription_id: subscription.id,
     current_plan_tier: parseInt(planTier),
     monthly_credit_amount: plan.credit,
-    current_credit_balance: plan.credit,
+    current_credit_balance: 0,
     next_billing_date: new Date(subscription.current_period_end * 1000).toISOString(),
     membership_status: subscription.status === 'active' ? 'ACTIVE' : 
                       subscription.status === 'past_due' ? 'GRACE' : 'LOCKED',

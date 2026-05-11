@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
-import { Download, Maximize2, Wallet, Smartphone } from 'lucide-react';
+import { Maximize2, ShieldCheck } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import type { Member } from '@/types';
-import Image from 'next/image';
 
 interface MembershipCardProps {
   member: Member;
@@ -37,61 +36,8 @@ export default function MembershipCard({ member }: MembershipCardProps) {
     }
   }, [member.id]);
 
-  const handleDownload = () => {
-    if (canvasRef.current) {
-      const url = canvasRef.current.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.download = `devicecare-card-${member.id}.png`;
-      link.href = url;
-      link.click();
-    }
-  };
-
   const handleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
-  };
-
-  const handleAddToAppleWallet = async () => {
-    // Call API to generate Apple Wallet pass
-    try {
-      const response = await fetch('/api/wallet/apple', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ memberId: member.id }),
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'devicecare-membership.pkpass';
-        link.click();
-      }
-    } catch (error) {
-      console.error('Failed to add to Apple Wallet:', error);
-      alert('Failed to add to Apple Wallet. Please try again.');
-    }
-  };
-
-  const handleAddToGoogleWallet = async () => {
-    // Call API to generate Google Wallet pass
-    try {
-      const response = await fetch('/api/wallet/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ memberId: member.id }),
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        // Open Google Wallet save URL
-        window.open(data.saveUrl, '_blank');
-      }
-    } catch (error) {
-      console.error('Failed to add to Google Wallet:', error);
-      alert('Failed to add to Google Wallet. Please try again.');
-    }
   };
 
   const getStatusColor = () => {
@@ -123,8 +69,9 @@ export default function MembershipCard({ member }: MembershipCardProps) {
             <h2 className="text-2xl font-bold text-white mb-1">
               DeviceCare
             </h2>
-            <p className="text-forest-100 text-sm">
-              Membership Card
+            <p className="text-forest-100 text-sm flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4" />
+              {member.membership_status === 'ACTIVE' ? 'Priority Member' : member.membership_status}
             </p>
           </div>
           <div className={`w-3 h-3 rounded-full ${getStatusColor()} animate-pulse`} />
@@ -147,7 +94,7 @@ export default function MembershipCard({ member }: MembershipCardProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-forest-200 text-xs uppercase tracking-wide mb-1">
-                Credit Balance
+                Available Credit
               </p>
               <p className="text-xl font-bold">
                 {formatCurrency(member.current_credit_balance)}
@@ -155,21 +102,12 @@ export default function MembershipCard({ member }: MembershipCardProps) {
             </div>
             <div>
               <p className="text-forest-200 text-xs uppercase tracking-wide mb-1">
-                Status
+                Member ID
               </p>
-              <p className="text-sm font-semibold">
-                {member.membership_status}
+              <p className="text-xs font-mono mt-1">
+                {member.id.substring(0, 8).toUpperCase()}
               </p>
             </div>
-          </div>
-
-          <div>
-            <p className="text-forest-200 text-xs uppercase tracking-wide mb-1">
-              Member ID
-            </p>
-            <p className="text-xs font-mono opacity-75">
-              {member.id.substring(0, 8).toUpperCase()}
-            </p>
           </div>
         </div>
       </div>
@@ -202,13 +140,18 @@ export default function MembershipCard({ member }: MembershipCardProps) {
           className="btn-secondary w-full flex items-center justify-center gap-2"
         >
           <Maximize2 className="w-4 h-4" />
-          Fullscreen
+          Fullscreen View
         </button>
       </div>
 
-      <p className="text-center text-sm text-forest-600 mt-4">
-        Scan this QR code in-store for instant access
-      </p>
+      <div className="mt-4 text-center">
+        <p className="text-sm text-forest-600 mb-2">
+          Scan this QR code in-store for instant priority service
+        </p>
+        <p className="text-xs text-forest-500">
+          You can also use your DeviceCare NFC fob if you have one
+        </p>
+      </div>
     </div>
   );
 }

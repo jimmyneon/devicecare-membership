@@ -30,10 +30,10 @@ export default async function MembershipCardPage() {
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-forest-900 mb-2">
-          Your Membership Card
+          Your DeviceCare Card
         </h1>
         <p className="text-forest-600">
-          Show this card in-store for priority service
+          Show this in-store for instant priority service
         </p>
       </div>
 
@@ -48,38 +48,38 @@ export default async function MembershipCardPage() {
             <span className="flex-shrink-0 w-6 h-6 bg-forest-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
               1
             </span>
-            <span>Visit New Forest Device Repairs with your device</span>
+            <span>Bring your device to New Forest Device Repairs</span>
           </li>
           <li className="flex gap-3">
             <span className="flex-shrink-0 w-6 h-6 bg-forest-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
               2
             </span>
-            <span>Show this QR code to staff for instant member lookup</span>
+            <span>Show this QR code or use your NFC fob for instant check-in</span>
           </li>
           <li className="flex gap-3">
             <span className="flex-shrink-0 w-6 h-6 bg-forest-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
               3
             </span>
-            <span>Your repair will be processed using your available credit</span>
+            <span>We&apos;ll use your available credit to cover labour costs</span>
           </li>
           <li className="flex gap-3">
             <span className="flex-shrink-0 w-6 h-6 bg-forest-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
               4
             </span>
-            <span>Parts (if needed) are paid separately at cost</span>
+            <span>Any parts needed are paid separately at cost price</span>
           </li>
         </ol>
       </div>
 
       <div className="mt-6 grid md:grid-cols-2 gap-4">
         <div className="card">
-          <h4 className="font-semibold text-forest-900 mb-2">Current Balance</h4>
+          <h4 className="font-semibold text-forest-900 mb-2">Available Credit</h4>
           <p className="text-2xl font-bold text-forest-900">
             {formatCurrency(typedMember.current_credit_balance)}
           </p>
           {typedMember.negative_balance_limit > 0 && (
             <p className="text-sm text-forest-600 mt-1">
-              +{formatCurrency(typedMember.negative_balance_limit)} buffer available
+              +{formatCurrency(typedMember.negative_balance_limit)} backup available
             </p>
           )}
         </div>
@@ -92,10 +92,10 @@ export default async function MembershipCardPage() {
               typedMember.membership_status === 'GRACE' ? 'badge-warning' :
               'badge-danger'
             }`}>
-              {typedMember.membership_status}
+              {typedMember.membership_status === 'ACTIVE' ? 'Active & Ready' : typedMember.membership_status}
             </span>
             <p className="text-sm text-forest-600">
-              Trust Tier: {typedMember.trust_tier || 'NEW'}
+              Priority service enabled
             </p>
           </div>
         </div>

@@ -30,9 +30,9 @@ function AuthCallbackContent() {
           console.log('Session exchanged successfully:', data.session ? 'yes' : 'no');
           // Wait a bit for cookies to be set
           await new Promise(resolve => setTimeout(resolve, 500));
-          // Force a full page reload to ensure middleware picks up the session
-          console.log('Redirecting to dashboard...');
-          window.location.href = '/dashboard';
+          // Redirect to password setup page
+          console.log('Redirecting to password setup...');
+          window.location.href = '/auth/setup-password';
         }
       } catch (err) {
         console.error('Exception during auth:', err);

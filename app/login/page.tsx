@@ -87,28 +87,34 @@ function LoginForm() {
 
   if (magicLinkSent) {
     return (
-      <div className="min-h-screen bg-ivory flex items-center justify-center p-4">
+      <div className="min-h-screen bg-cream-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-10 h-10 text-green-600" />
+            <div className="w-16 h-16 bg-forest-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-10 h-10 text-forest-700" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-forest-900 mb-2">
               Check Your Email
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-forest-700 mb-6">
               We&apos;ve sent a magic link to <strong>{email}</strong>
             </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900 mb-4">
+            <div className="bg-forest-50 border border-forest-200 rounded-lg p-4 text-sm text-forest-900 mb-6">
               <p className="mb-2">Click the link in your email to sign in.</p>
-              <p className="text-blue-700">The link expires in 1 hour.</p>
+              <p className="text-forest-700">The link expires in 1 hour.</p>
             </div>
+            <a
+              href={`mailto:${email}`}
+              className="btn-primary w-full mb-4 inline-block text-center"
+            >
+              Open Email App
+            </a>
             <button
               onClick={() => {
                 setMagicLinkSent(false);
                 setEmail('');
               }}
-              className="text-gray-700 hover:text-gray-900 text-sm font-medium"
+              className="text-forest-700 hover:text-forest-900 text-sm font-medium"
             >
               Use a different email
             </button>
@@ -119,13 +125,13 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-forest-800 via-forest-700 to-forest-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-cream-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <h1 className="text-4xl font-bold text-forest-900 mb-2">
             DeviceCare Membership
           </h1>
-          <p className="text-forest-100">
+          <p className="text-forest-700">
             Sign in to access your account
           </p>
         </div>
