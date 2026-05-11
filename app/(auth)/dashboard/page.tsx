@@ -27,6 +27,11 @@ export default async function DashboardPage() {
   // Type assertion to fix Supabase type inference
   const member = memberData as any;
 
+  // Redirect ADMIN and STAFF to admin dashboard
+  if (member.role === 'ADMIN' || member.role === 'STAFF') {
+    redirect('/admin');
+  }
+
   const { data: recentTransactionsData } = await supabase
     .from('credit_ledger')
     .select('*')
