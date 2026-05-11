@@ -174,7 +174,4 @@ export default async function DashboardPage() {
 
     </div>
   );
-  } catch (error) {
-    console.error('Dashboard error:', error);
-    redirect('/login');
-  }
+}
