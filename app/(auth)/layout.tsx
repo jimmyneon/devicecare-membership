@@ -22,6 +22,11 @@ export default async function AuthLayout({
     .eq('id', session.user.id)
     .single();
 
+  // If no member data, redirect to onboarding
+  if (!memberData) {
+    redirect('/onboarding');
+  }
+
   const member = memberData as any;
 
   const handleSignOut = async () => {
