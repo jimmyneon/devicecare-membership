@@ -12,7 +12,7 @@ export default function SubscriptionSettings({ member }: SubscriptionSettingsPro
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showPauseModal, setShowPauseModal] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
-  const [pauseMonths, setPauseMonths] = useState(1);
+  const pauseMonths = 1; // Always 1 month - no longer user-selectable
   const [loading, setLoading] = useState(false);
 
   const memberSince = new Date(member.member_since);
@@ -137,7 +137,7 @@ export default function SubscriptionSettings({ member }: SubscriptionSettingsPro
           </h2>
           
           <p className="text-gray-600 mb-4">
-            Need a break? Pause your subscription for 1-3 months. Your credit balance will be frozen and billing will stop.
+            Need a break? Pause your subscription for 1 month. Your credit balance will be frozen and billing will stop.
           </p>
 
           {!canPause ? (
@@ -237,17 +237,13 @@ export default function SubscriptionSettings({ member }: SubscriptionSettingsPro
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-4">Pause Subscription</h3>
             
-            <div className="mb-4">
-              <label className="label">How long would you like to pause?</label>
-              <select
-                value={pauseMonths}
-                onChange={(e) => setPauseMonths(parseInt(e.target.value))}
-                className="input"
-              >
-                <option value={1}>1 month</option>
-                <option value={2}>2 months</option>
-                <option value={3}>3 months</option>
-              </select>
+            <div className="mb-4 bg-gray-50 rounded-lg p-4">
+              <p className="text-sm text-gray-700">
+                <strong>Pause Duration:</strong> 1 month
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                You can pause again after resuming if needed
+              </p>
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
@@ -255,10 +251,10 @@ export default function SubscriptionSettings({ member }: SubscriptionSettingsPro
                 <strong>What happens when you pause:</strong>
               </p>
               <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-                <li>No charges for {pauseMonths} month{pauseMonths > 1 ? 's' : ''}</li>
+                <li>No charges for 1 month</li>
                 <li>Your credit balance will be frozen</li>
                 <li>Service will be unavailable during pause</li>
-                <li>Automatically resumes after pause period</li>
+                <li>Automatically resumes after 1 month</li>
               </ul>
             </div>
 
@@ -318,7 +314,7 @@ export default function SubscriptionSettings({ member }: SubscriptionSettingsPro
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <p className="text-sm text-blue-900">
-                <strong>Consider pausing instead?</strong> You can pause for 1-3 months and keep your credit balance.
+                <strong>Consider pausing instead?</strong> You can pause for 1 month and keep your credit balance.
               </p>
             </div>
 

@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { formatCurrency, formatDate, formatRelativeTime } from '@/lib/utils';
-import { Settings, ExternalLink, ChevronRight } from 'lucide-react';
+import { User, ExternalLink, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import MembershipCardComponent from '@/components/MembershipCard';
 import type { Database } from '@/types/database';
@@ -78,8 +78,8 @@ export default async function DashboardPage() {
             {getPlanName(member.current_plan_tier)} Member • {getMembershipDuration()}
           </p>
         </div>
-        <Link href="/settings" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <Settings className="w-6 h-6 text-gray-600" />
+        <Link href="/profile" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <User className="w-6 h-6 text-gray-600" />
         </Link>
       </div>
 
@@ -149,37 +149,6 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Recent Activity */}
-      {recentTransactions && recentTransactions.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <h2 className="font-semibold text-gray-900 mb-3">Recent Activity</h2>
-          <div className="space-y-3">
-            {recentTransactions.slice(0, 3).map((transaction: any) => (
-              <div key={transaction.id} className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    {transaction.transaction_type === 'ACCRUAL' && 'Credit added'}
-                    {transaction.transaction_type === 'USAGE' && 'Used for repair'}
-                    {transaction.transaction_type === 'TOPUP' && 'Top-up'}
-                    {transaction.transaction_type === 'EXPIRY' && 'Expired'}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {formatRelativeTime(transaction.created_at)}
-                  </p>
-                </div>
-                <p className={`font-semibold ${
-                  ['ACCRUAL', 'TOPUP'].includes(transaction.transaction_type)
-                    ? 'text-green-600'
-                    : 'text-gray-900'
-                }`}>
-                  {['ACCRUAL', 'TOPUP'].includes(transaction.transaction_type) ? '+' : ''}
-                  {formatCurrency(transaction.amount)}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

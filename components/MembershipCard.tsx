@@ -118,15 +118,28 @@ export default function MembershipCard({ member }: MembershipCardProps) {
 
   if (isFullscreen) {
     return (
-      <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-4">
         <button
           onClick={handleFullscreen}
-          className="absolute top-4 right-4 text-white hover:text-forest-200 text-sm"
+          className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center text-white hover:bg-white/10 rounded-full text-3xl font-light transition-colors"
+          aria-label="Close"
         >
-          Close ✕
+          ×
         </button>
-        <div className="max-w-2xl w-full">
-          <CardContent />
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-white mb-2">
+            {member.full_name || 'Member'}
+          </h2>
+          <p className="text-white/80">Show this QR code in-store</p>
+        </div>
+        <div className="bg-white p-8 rounded-2xl shadow-2xl">
+          <canvas ref={canvasRef} className="w-full h-full" style={{ width: '400px', height: '400px' }} />
+        </div>
+        <div className="mt-6 text-center">
+          <p className="text-white/90 font-semibold text-xl mb-1">
+            {formatCurrency(member.current_credit_balance)}
+          </p>
+          <p className="text-white/60 text-sm">Available Credit</p>
         </div>
       </div>
     );
