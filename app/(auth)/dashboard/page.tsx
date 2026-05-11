@@ -27,8 +27,8 @@ export default async function DashboardPage() {
   // Type assertion to fix Supabase type inference
   const member = memberData as any;
 
-  // Redirect ADMIN and STAFF to admin dashboard
-  if (member.role === 'ADMIN' || member.role === 'STAFF') {
+  // Redirect ADMIN and STAFF to admin dashboard (only if role is explicitly set)
+  if (member?.role && (member.role === 'ADMIN' || member.role === 'STAFF')) {
     redirect('/admin');
   }
 
