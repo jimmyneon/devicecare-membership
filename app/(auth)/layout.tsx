@@ -32,9 +32,16 @@ export default async function AuthLayout({
   const handleSignOut = async () => {
     'use server';
     const supabase = createClient();
+    
+    // Sign out from Supabase
     await supabase.auth.signOut();
-    cookies().delete('sb-dejiscmseyvadrkdtgyj-auth-token');
-    cookies().delete('sb-dejiscmseyvadrkdtgyj-auth-token-code-verifier');
+    
+    // Clear all auth cookies
+    const cookieStore = cookies();
+    cookieStore.delete('sb-dejiscmseyvadrkdtgyj-auth-token');
+    cookieStore.delete('sb-dejiscmseyvadrkdtgyj-auth-token-code-verifier');
+    
+    // Redirect to login
     redirect('/login');
   };
 
