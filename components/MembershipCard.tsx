@@ -84,34 +84,13 @@ export default function MembershipCard({ member }: MembershipCardProps) {
       </div>
 
       {/* Member Info */}
-      <div className="px-6 py-4 space-y-3">
-        <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-            Member
-          </p>
-          <p className="text-base font-semibold text-gray-900">
-            {member.full_name || 'Member'}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-200">
-          <div>
-            <p className="text-xs text-gray-500 mb-1">
-              Credit
-            </p>
-            <p className="text-lg font-bold text-gray-900">
-              {formatCurrency(member.current_credit_balance)}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500 mb-1">
-              ID
-            </p>
-            <p className="text-xs font-mono text-gray-700 mt-1">
-              {member.id.substring(0, 8).toUpperCase()}
-            </p>
-          </div>
-        </div>
+      <div className="px-6 py-4">
+        <p className="font-semibold text-gray-900 mb-1">
+          {member.full_name || 'Member'}
+        </p>
+        <p className="text-xs text-gray-500">
+          Member ID: {member.id.substring(0, 8).toUpperCase()}
+        </p>
       </div>
     </div>
   );

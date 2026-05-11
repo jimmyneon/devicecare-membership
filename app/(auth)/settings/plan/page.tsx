@@ -7,24 +7,36 @@ import { createClient } from '@/lib/supabase/client';
 const PLANS = [
   {
     id: 'tier_1',
-    name: 'Basic',
-    price: 25,
-    credit: 25,
-    features: ['£25 monthly credit', 'Repair priority: Standard', 'Email support'],
+    tier: 1,
+    name: 'Starter',
+    price: 10,
+    credit: 10,
+    features: ['£10 credit per month', 'Priority service', 'Credit rolls over for 12 months'],
   },
   {
     id: 'tier_2',
-    name: 'Premium',
-    price: 45,
-    credit: 50,
-    features: ['£50 monthly credit', 'Repair priority: High', 'Priority support', 'Discounted parts'],
+    tier: 2,
+    name: 'Standard',
+    price: 25,
+    credit: 25,
+    features: ['£25 credit per month', 'Priority service', 'Credit rolls over for 12 months', 'Free diagnostics'],
+    popular: true,
   },
   {
     id: 'tier_3',
-    name: 'Business',
-    price: 75,
+    tier: 3,
+    name: 'Premium',
+    price: 50,
+    credit: 50,
+    features: ['£50 credit per month', 'Priority service', 'Credit rolls over for 12 months', 'Free diagnostics', 'Faster service'],
+  },
+  {
+    id: 'tier_4',
+    tier: 4,
+    name: 'Elite',
+    price: 100,
     credit: 100,
-    features: ['£100 monthly credit', 'Repair priority: VIP', '24/7 support', 'Discounted parts', 'Bulk repair discounts'],
+    features: ['£100 credit per month', 'Highest priority', 'Credit rolls over for 12 months', 'Free diagnostics', 'Fastest service', 'Extras included'],
   },
 ];
 
@@ -89,14 +101,16 @@ export default function PlanPage() {
       )}
 
       <div className="grid md:grid-cols-3 gap-6">
-        {PLANS.map((plan) => (
+        {PLANS.map((plan) => {
+          const isCurrentPlan = currentPlan?.current_plan_tier === plan.tier;
+          return (
           <div
             key={plan.id}
-            className={`card ${
-              currentPlan?.current_plan_tier === parseInt(plan.id.split('_')[1])
-                ? 'ring-2 ring-forest-900'
-                : ''
-            }`}
+            className={`bg-white rounded-xl border-2 p-6 ${
+              isCurrentPlan
+                ? 'border-forest-700 shadow-lg'
+                : 'border-gray-200'
+            } ${plan.popular ? 'ring-2 ring-blue-500' : ''}`}
           >
             <div className="text-center mb-6">
               <h3 className="text-xl font-bold text-forest-900 mb-2">{plan.name}</h3>
@@ -118,22 +132,27 @@ export default function PlanPage() {
 
             <button
               onClick={() => handleChangePlan(plan.id)}
-              disabled={loading || currentPlan?.current_plan_tier === parseInt(plan.id.split('_')[1])}
-              className="btn-primary w-full flex items-center justify-center gap-2"
+              disabled={loading || isCurrentPlan}
+              className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
+                isCurrentPlan
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-forest-700 hover:bg-forest-800 text-white'
+              }`}
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
                   Loading...
                 </>
-              ) : currentPlan?.current_plan_tier === parseInt(plan.id.split('_')[1]) ? (
+              ) : isCurrentPlan ? (
                 'Current Plan'
               ) : (
                 'Switch to This Plan'
               )}
             </button>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="mt-6 card">

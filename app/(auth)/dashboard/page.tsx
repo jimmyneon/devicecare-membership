@@ -89,14 +89,32 @@ export default async function DashboardPage() {
         <p className="text-5xl font-bold text-gray-900 mb-3">
           {formatCurrency(member.current_credit_balance)}
         </p>
-        {member.negative_balance_limit > 0 && (
-          <p className="text-sm text-gray-600">
-            Plus {formatCurrency(member.negative_balance_limit)} backup if you need it
-          </p>
-        )}
-        {member.membership_status === 'ACTIVE' && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <p className="text-sm text-green-700 font-medium">✓ Priority service active</p>
+        
+        {/* Trust Tier Buffer - Customer Friendly */}
+        {member.negative_balance_limit > 0 ? (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg">
+              <Check className="w-4 h-4" />
+              <span>Priority service active</span>
+            </div>
+            <details className="text-sm">
+              <summary className="cursor-pointer text-gray-600 hover:text-gray-900 font-medium">
+                What if I need more credit?
+              </summary>
+              <div className="mt-2 p-3 bg-blue-50 rounded-lg text-blue-900">
+                <p className="mb-2">
+                  <strong>Good news!</strong> You can use up to <strong>{formatCurrency(member.negative_balance_limit)}</strong> more than your balance for repairs.
+                </p>
+                <p className="text-xs text-blue-700">
+                  This is our way of trusting you as a loyal member. Just pay it back with your next monthly credit.
+                </p>
+              </div>
+            </details>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
+            <Check className="w-4 h-4" />
+            <span>Priority service active</span>
           </div>
         )}
       </div>
