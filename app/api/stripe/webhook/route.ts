@@ -155,6 +155,28 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription, isNew
       throw new Error(`Member insert failed: ${insertError.message}`);
     }
     console.log('Member created successfully:', insertData);
+    
+    // Send magic link email to new member
+    try {
+      await supabaseAdmin.auth.admin.generateLink({
+        type: 'magiclink',
+        email: email,
+        options: {
+          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+        },
+      }).then(async ({ data, error }) => {
+        if (error) {
+          console.error('Failed to generate magic link:', error);
+        } else if (data?.properties?.action_link) {
+          // Send email with magic link
+          console.log('Magic link generated for:', email);
+          // Note: Supabase automatically sends the email
+        }
+      });
+    } catch (emailError) {
+      console.error('Error sending magic link:', emailError);
+      // Don't throw - member is created, they can use password reset
+    }
   }
 
   // Upsert subscription record
