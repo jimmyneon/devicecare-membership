@@ -62,6 +62,12 @@ export default function ScanPage() {
   const handleUseCredit = async (amount: number) => {
     if (!member) return;
 
+    // Block if account is locked
+    if (member.membership_status === 'LOCKED') {
+      setError('❌ Account is LOCKED. Member must update payment method before using credit.');
+      return;
+    }
+
     setProcessing(true);
     setError('');
     setSuccess('');
@@ -180,11 +186,46 @@ export default function ScanPage() {
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                 member.membership_status === 'ACTIVE' 
                   ? 'bg-green-100 text-green-800'
+                  : member.membership_status === 'GRACE'
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : member.membership_status === 'LOCKED'
+                  ? 'bg-red-100 text-red-800'
                   : 'bg-gray-100 text-gray-800'
               }`}>
                 {member.membership_status}
               </span>
             </div>
+
+            {/* Payment Issue Warning */}
+            {(member.membership_status === 'GRACE' || member.membership_status === 'LOCKED') && (
+              <div className={`p-4 rounded-lg mb-4 ${
+                member.membership_status === 'LOCKED' 
+                  ? 'bg-red-50 border-2 border-red-200' 
+                  : 'bg-yellow-50 border-2 border-yellow-200'
+              }`}>
+                <div className="flex items-start gap-3">
+                  <AlertCircle className={`w-5 h-5 mt-0.5 ${
+                    member.membership_status === 'LOCKED' ? 'text-red-600' : 'text-yellow-600'
+                  }`} />
+                  <div>
+                    <p className={`font-semibold ${
+                      member.membership_status === 'LOCKED' ? 'text-red-900' : 'text-yellow-900'
+                    }`}>
+                      {member.membership_status === 'LOCKED' 
+                        ? '🔒 Account Locked - Payment Failed' 
+                        : '⚠️ Payment Issue Detected'}
+                    </p>
+                    <p className={`text-sm mt-1 ${
+                      member.membership_status === 'LOCKED' ? 'text-red-700' : 'text-yellow-700'
+                    }`}>
+                      {member.membership_status === 'LOCKED'
+                        ? 'Cannot use credit. Member must update payment method.'
+                        : 'Payment failed. Member can still use credit but should update card.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Credit Info */}
             <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
