@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { LogOut, CreditCard, Settings, User } from 'lucide-react';
+import { LogOut, CreditCard, Settings, User, Home } from 'lucide-react';
 import { cookies } from 'next/headers';
 
 export default async function AuthLayout({
