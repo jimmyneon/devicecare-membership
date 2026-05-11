@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { Home, CreditCard, Settings, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { LogOut, CreditCard, Settings, User } from 'lucide-react';
+import { cookies } from 'next/headers';
 
 export default async function AuthLayout({
   children,
@@ -27,6 +28,8 @@ export default async function AuthLayout({
     'use server';
     const supabase = createClient();
     await supabase.auth.signOut();
+    cookies().delete('sb-dejiscmseyvadrkdtgyj-auth-token');
+    cookies().delete('sb-dejiscmseyvadrkdtgyj-auth-token-code-verifier');
     redirect('/login');
   };
 
