@@ -6,6 +6,7 @@ import Link from 'next/link';
 import MembershipCardComponent from '@/components/MembershipCard';
 import type { Database } from '@/types/database';
 
+// Dashboard page for customer accounts
 export default async function DashboardPage() {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
