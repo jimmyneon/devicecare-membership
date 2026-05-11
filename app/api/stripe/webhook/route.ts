@@ -206,35 +206,56 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription, isNew
   if (!existingMember && isNewSubscription) {
     console.log('📧 Attempting to send welcome email to:', email);
     try {
-      // Generate a secure token for account setup
-      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'signup',
-        email,
-        options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/setup-account`,
-        },
-      });
-
-      if (linkError) {
-        console.error('❌ Failed to generate setup link:', linkError);
-      } else if (linkData?.properties?.action_link) {
-        console.log('✅ Setup link generated:', linkData.properties.action_link);
-        
-        // Send email via Resend
-        const { sendWelcomeEmail } = await import('@/lib/email/resend');
-        const result = await sendWelcomeEmail(
+      // Check if auth user already exists
+      const { data: authUser } = await supabaseAdmin.auth.admin.getUserByEmail(email);
+      
+      if (authUser?.user) {
+        // User exists in auth, send magic link instead
+        console.log('✅ Auth user exists, sending magic link');
+        const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+          type: 'magiclink',
           email,
-          linkData.properties.action_link,
-          (customer as any).name || 'Member'
-        );
+          options: {
+            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+          },
+        });
 
-        if (result.success) {
-          console.log('✅ Welcome email sent successfully to:', email);
-        } else {
-          console.error('❌ Failed to send welcome email via Resend:', result.error);
+        if (linkError) {
+          console.error('❌ Failed to generate magic link:', linkError);
+        } else if (linkData?.properties?.action_link) {
+          console.log('✅ Magic link generated:', linkData.properties.action_link);
+          // Supabase automatically sends the magic link email
         }
       } else {
-        console.error('❌ No action link in response');
+        // New user, generate signup link
+        console.log('✅ New auth user, generating signup link');
+        const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+          type: 'signup',
+          email,
+          options: {
+            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/setup-account`,
+          },
+        });
+
+        if (linkError) {
+          console.error('❌ Failed to generate setup link:', linkError);
+        } else if (linkData?.properties?.action_link) {
+          console.log('✅ Setup link generated:', linkData.properties.action_link);
+          
+          // Send email via Resend
+          const { sendWelcomeEmail } = await import('@/lib/email/resend');
+          const result = await sendWelcomeEmail(
+            email,
+            linkData.properties.action_link,
+            (customer as any).name || 'Member'
+          );
+
+          if (result.success) {
+            console.log('✅ Welcome email sent successfully to:', email);
+          } else {
+            console.error('❌ Failed to send welcome email via Resend:', result.error);
+          }
+        }
       }
     } catch (emailError) {
       console.error('❌ Exception sending welcome email:', emailError);
