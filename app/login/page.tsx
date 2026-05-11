@@ -275,7 +275,7 @@ function LoginForm() {
           <div className="mt-6 pt-6 border-t border-gray-200 text-center">
             <p className="text-sm text-gray-600">
               Don&apos;t have an account?{' '}
-              <Link href="/" className="text-primary hover:underline font-medium">
+              <Link href="/onboarding" className="text-primary hover:underline font-medium">
                 Sign up
               </Link>
             </p>
