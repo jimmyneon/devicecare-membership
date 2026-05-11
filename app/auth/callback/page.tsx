@@ -8,30 +8,34 @@ function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
-  const next = searchParams.get('next') || '/dashboard';
 
   useEffect(() => {
-    if (!code) {
-      router.push('/login?error=no_code');
-      return;
-    }
-
     const handleAuth = async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+      if (!code) {
+        router.push('/login');
+        return;
+      }
 
-      if (error) {
-        console.error('Auth error:', error);
-        router.push(`/login?error=${encodeURIComponent(error.message)}`);
-      } else {
-        console.log('Auth successful, redirecting to:', next);
-        router.push(next);
-        router.refresh();
+      const supabase = createClient();
+      
+      try {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+        if (error) {
+          console.error('Auth error:', error);
+          router.push('/login');
+        } else {
+          // Force a full page reload to ensure middleware picks up the session
+          window.location.href = '/dashboard';
+        }
+      } catch (err) {
+        console.error('Exception during auth:', err);
+        router.push('/login');
       }
     };
 
     handleAuth();
-  }, [code, next, router]);
+  }, [code, router]);
 
   return (
     <div className="min-h-screen bg-cream-100 flex items-center justify-center">
