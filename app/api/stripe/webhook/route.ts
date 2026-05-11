@@ -271,7 +271,14 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     })
     .eq('id', subscription.member_id);
 
-  await supabaseAdmin.rpc('add_credit', {
+  console.log('💳 Adding credit:', {
+    member_id: subscription.member_id,
+    amount: subscription.credit_amount,
+    subscription_id: subscription.id,
+    payment_intent: invoice.payment_intent,
+  });
+
+  const { data: creditResult, error: creditError } = await supabaseAdmin.rpc('add_credit', {
     p_member_id: subscription.member_id,
     p_amount: subscription.credit_amount,
     p_transaction_type: 'ACCRUAL',
@@ -279,6 +286,13 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     p_stripe_payment_intent_id: invoice.payment_intent as string,
     p_notes: `Monthly credit for ${new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}`,
   });
+
+  if (creditError) {
+    console.error('❌ Failed to add credit:', creditError);
+    throw new Error(`Credit addition failed: ${creditError.message}`);
+  }
+
+  console.log('✅ Credit added successfully. Ledger ID:', creditResult);
 
   await supabaseAdmin.rpc('update_trust_tier', {
     p_member_id: subscription.member_id,

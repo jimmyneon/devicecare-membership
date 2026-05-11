@@ -57,57 +57,59 @@ export default function MembershipCard({ member }: MembershipCardProps) {
   };
 
   const CardContent = () => (
-    <div className={`relative bg-gradient-to-br from-forest-800 via-forest-700 to-forest-900 rounded-2xl shadow-2xl overflow-hidden ${
-      isFullscreen ? 'w-full h-full flex items-center justify-center p-8' : 'p-8'
+    <div className={`relative bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden ${
+      isFullscreen ? 'w-full max-w-md mx-auto' : ''
     }`}>
-      <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32" />
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24" />
-      
-      <div className="relative z-10">
-        <div className="flex items-start justify-between mb-6">
+      {/* Header */}
+      <div className="bg-forest-700 px-6 py-4">
+        <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-white mb-1">
+            <h2 className="text-lg font-bold text-white">
               DeviceCare
             </h2>
-            <p className="text-forest-100 text-sm flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4" />
+            <p className="text-forest-100 text-xs flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3" />
               {member.membership_status === 'ACTIVE' ? 'Priority Member' : member.membership_status}
             </p>
           </div>
-          <div className={`w-3 h-3 rounded-full ${getStatusColor()} animate-pulse`} />
+          <div className={`w-2 h-2 rounded-full ${getStatusColor()}`} />
         </div>
+      </div>
 
-        <div className="bg-white rounded-xl p-6 mb-6 flex items-center justify-center">
+      {/* QR Code */}
+      <div className="bg-gray-50 p-8 flex items-center justify-center">
+        <div className="bg-white p-4 rounded-xl shadow-sm">
           <canvas ref={canvasRef} className="max-w-full" />
         </div>
+      </div>
 
-        <div className="space-y-3 text-white">
+      {/* Member Info */}
+      <div className="px-6 py-4 space-y-3">
+        <div>
+          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+            Member
+          </p>
+          <p className="text-base font-semibold text-gray-900">
+            {member.full_name || 'Member'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-200">
           <div>
-            <p className="text-forest-200 text-xs uppercase tracking-wide mb-1">
-              Member Name
+            <p className="text-xs text-gray-500 mb-1">
+              Credit
             </p>
-            <p className="text-lg font-semibold">
-              {member.full_name || 'Member'}
+            <p className="text-lg font-bold text-gray-900">
+              {formatCurrency(member.current_credit_balance)}
             </p>
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-forest-200 text-xs uppercase tracking-wide mb-1">
-                Available Credit
-              </p>
-              <p className="text-xl font-bold">
-                {formatCurrency(member.current_credit_balance)}
-              </p>
-            </div>
-            <div>
-              <p className="text-forest-200 text-xs uppercase tracking-wide mb-1">
-                Member ID
-              </p>
-              <p className="text-xs font-mono mt-1">
-                {member.id.substring(0, 8).toUpperCase()}
-              </p>
-            </div>
+          <div>
+            <p className="text-xs text-gray-500 mb-1">
+              ID
+            </p>
+            <p className="text-xs font-mono text-gray-700 mt-1">
+              {member.id.substring(0, 8).toUpperCase()}
+            </p>
           </div>
         </div>
       </div>
@@ -134,22 +136,22 @@ export default function MembershipCard({ member }: MembershipCardProps) {
     <div>
       <CardContent />
 
-      <div className="mt-6">
+      <div className="mt-4">
         <button
           onClick={handleFullscreen}
-          className="btn-secondary w-full flex items-center justify-center gap-2"
+          className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
         >
           <Maximize2 className="w-4 h-4" />
-          Fullscreen View
+          Enlarge QR Code
         </button>
       </div>
 
-      <div className="mt-4 text-center">
-        <p className="text-sm text-forest-600 mb-2">
-          Scan this QR code in-store for instant priority service
+      <div className="mt-3 text-center">
+        <p className="text-sm text-gray-700">
+          Show this QR code in-store for instant check-in
         </p>
-        <p className="text-xs text-forest-500">
-          You can also use your DeviceCare NFC fob if you have one
+        <p className="text-xs text-gray-500 mt-1">
+          Or use your NFC fob if you have one
         </p>
       </div>
     </div>

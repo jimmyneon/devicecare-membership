@@ -134,6 +134,16 @@ export default function CompleteProfilePage() {
       // Upload photo if provided
       if (photoFile) {
         setUploading(true);
+        
+        // Check upload limit
+        const { data: canUpload } = await supabase.rpc('can_upload_profile_photo', {
+          p_member_id: user.id
+        });
+        
+        if (!canUpload) {
+          throw new Error('Photo upload limit reached. Contact support if you need to update your photo.');
+        }
+        
         const fileExt = photoFile.name.split('.').pop();
         const fileName = `${user.id}-${Date.now()}.${fileExt}`;
         
@@ -153,19 +163,35 @@ export default function CompleteProfilePage() {
       }
 
       // Update member profile
+      const updateData: any = {
+        phone: formData.phone,
+        address_line1: formData.address_line1,
+        address_line2: formData.address_line2 || null,
+        city: formData.city,
+        postcode: formData.postcode,
+        profile_completed: true,
+        profile_completed_at: new Date().toISOString(),
+      };
+      
+      // If photo was uploaded, update photo fields
+      if (photoUrl) {
+        updateData.profile_photo_url = photoUrl;
+        updateData.last_photo_upload_at = new Date().toISOString();
+        
+        // Increment upload counter separately
+        const { data: currentMember } = await supabase
+          .from('members')
+          .select('profile_photo_upload_count')
+          .eq('id', user.id)
+          .single();
+        
+        updateData.profile_photo_upload_count = (currentMember?.profile_photo_upload_count || 0) + 1;
+      }
+      
       const { error: updateError } = await supabase
         .from('members')
         // @ts-ignore - Supabase type inference issue
-        .update({
-          phone: formData.phone,
-          address_line1: formData.address_line1,
-          address_line2: formData.address_line2 || null,
-          city: formData.city,
-          postcode: formData.postcode,
-          profile_photo_url: photoUrl,
-          profile_completed: true,
-          profile_completed_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', user.id);
 
       if (updateError) throw updateError;
