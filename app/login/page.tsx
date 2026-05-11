@@ -55,7 +55,14 @@ function LoginForm() {
         router.push('/dashboard');
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in');
+      // Provide user-friendly error messages
+      if (err.message?.includes('Invalid login credentials')) {
+        setError("We don't recognize those details. Please check your email and password, or click 'Sign Up' to create an account.");
+      } else if (err.message?.includes('Email not confirmed')) {
+        setError('Please check your email and click the confirmation link before signing in.');
+      } else {
+        setError(err.message || 'Failed to sign in. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
