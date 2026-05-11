@@ -12,6 +12,7 @@ function AuthCallbackContent() {
   useEffect(() => {
     const handleAuth = async () => {
       if (!code) {
+        console.log('No code, redirecting to login');
         router.push('/login');
         return;
       }
@@ -19,13 +20,18 @@ function AuthCallbackContent() {
       const supabase = createClient();
       
       try {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        console.log('Exchanging code for session...');
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
         if (error) {
           console.error('Auth error:', error);
           router.push('/login');
         } else {
+          console.log('Session exchanged successfully:', data.session ? 'yes' : 'no');
+          // Wait a bit for cookies to be set
+          await new Promise(resolve => setTimeout(resolve, 500));
           // Force a full page reload to ensure middleware picks up the session
+          console.log('Redirecting to dashboard...');
           window.location.href = '/dashboard';
         }
       } catch (err) {
