@@ -25,20 +25,30 @@ export async function POST(request: Request) {
     }
 
     // Get member data
-    const { data: member } = await supabase
+    const { data: memberData } = await supabase
       .from('members')
       .select('stripe_customer_id, email, full_name')
       .eq('id', session.user.id)
       .single();
 
-    if (!member) {
+    if (!memberData) {
       return NextResponse.json(
         { error: 'Member not found' },
         { status: 404 }
       );
     }
 
+    // Type assertion for member data
+    const member = memberData as any;
+
     // Create Stripe checkout session
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe not configured' },
+        { status: 500 }
+      );
+    }
+
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: member.stripe_customer_id,
       mode: 'payment',

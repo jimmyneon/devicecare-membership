@@ -78,4 +78,5 @@ export const WEBHOOK_EVENTS = {
   INVOICE_PAYMENT_FAILED: 'invoice.payment_failed',
   PAYMENT_INTENT_SUCCEEDED: 'payment_intent.succeeded',
   PAYMENT_INTENT_FAILED: 'payment_intent.payment_failed',
+  CHECKOUT_SESSION_COMPLETED: 'checkout.session.completed', // For top-ups
 } as const;
