@@ -8,39 +8,53 @@ import type { Database } from '@/types/database';
 
 // Dashboard page for customer accounts
 export default async function DashboardPage() {
+  console.log('[DASHBOARD] Starting dashboard page load');
+  
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
+  console.log('[DASHBOARD] Session check:', session ? 'Has session' : 'No session');
 
   if (!session) {
+    console.log('[DASHBOARD] No session, redirecting to login');
     redirect('/login');
   }
 
-  const { data: memberData } = await supabase
+  console.log('[DASHBOARD] Fetching member data for:', session.user.id);
+  const { data: memberData, error: memberError } = await supabase
     .from('members')
     .select('*')
     .eq('id', session.user.id)
     .single();
 
+  console.log('[DASHBOARD] Member data:', memberData ? 'Found' : 'Not found', 'Error:', memberError);
+
   if (!memberData) {
+    console.log('[DASHBOARD] No member data, redirecting to onboarding');
     redirect('/onboarding');
   }
 
   // Type assertion to fix Supabase type inference
   const member = memberData as any;
+  console.log('[DASHBOARD] Member role:', member.role);
 
   // Only redirect if explicitly ADMIN or STAFF
   if (member.role === 'ADMIN' || member.role === 'STAFF') {
+    console.log('[DASHBOARD] Admin/Staff detected, redirecting to /admin');
     redirect('/admin');
   }
 
-  const { data: recentTransactionsData } = await supabase
+  console.log('[DASHBOARD] Fetching recent transactions');
+  const { data: recentTransactionsData, error: txError } = await supabase
     .from('credit_ledger')
     .select('*')
     .eq('member_id', session.user.id)
     .order('created_at', { ascending: false })
     .limit(5);
 
-  const { data: expiringCreditsData } = await supabase
+  console.log('[DASHBOARD] Recent transactions:', recentTransactionsData?.length || 0, 'Error:', txError);
+
+  console.log('[DASHBOARD] Fetching expiring credits');
+  const { data: expiringCreditsData, error: expError } = await supabase
     .from('credit_ledger')
     .select('*')
     .eq('member_id', session.user.id)
@@ -50,8 +64,12 @@ export default async function DashboardPage() {
     .lte('expires_at', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString())
     .order('expires_at', { ascending: true });
 
-  const recentTransactions = recentTransactionsData as any;
-  const expiringCredits = expiringCreditsData as any;
+  console.log('[DASHBOARD] Expiring credits:', expiringCreditsData?.length || 0, 'Error:', expError);
+
+  const recentTransactions = recentTransactionsData || [];
+  const expiringCredits = expiringCreditsData || [];
+  
+  console.log('[DASHBOARD] About to render page');
 
   type Member = Database['public']['Tables']['members']['Row'];
   const typedMember = member as Member;
