@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { LogOut, CreditCard, Settings, User, Home } from 'lucide-react';
 import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 
 export default async function AuthLayout({
   children,
@@ -16,21 +17,25 @@ export default async function AuthLayout({
     redirect('/login');
   }
 
+  // Get current path to avoid redirect loops
+  const headersList = headers();
+  const pathname = headersList.get('x-pathname') || '';
+
   const { data: memberData } = await supabase
     .from('members')
     .select('*')
     .eq('id', session.user.id)
     .single();
 
-  // If no member data, redirect to onboarding
-  if (!memberData) {
+  // If no member data, redirect to onboarding (unless already there)
+  if (!memberData && !pathname.includes('/onboarding')) {
     redirect('/onboarding');
   }
 
   const member = memberData as any;
 
-  // If profile is incomplete, redirect to complete-profile
-  if (!member.profile_completed) {
+  // If profile is incomplete, redirect to complete-profile (but don't redirect if already on that page)
+  if (member && !member.profile_completed && !pathname.includes('/complete-profile')) {
     redirect('/complete-profile');
   }
 
