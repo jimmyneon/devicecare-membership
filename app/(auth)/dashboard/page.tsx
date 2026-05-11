@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { formatCurrency, formatDate, formatRelativeTime } from '@/lib/utils';
-import { User, ExternalLink, ChevronRight } from 'lucide-react';
+import { User, ExternalLink, ChevronRight, Check } from 'lucide-react';
 import Link from 'next/link';
 import MembershipCardComponent from '@/components/MembershipCard';
 import type { Database } from '@/types/database';
