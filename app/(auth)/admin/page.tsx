@@ -1,4 +1,4 @@
-// Admin dashboard - staff interface
+// Admin dashboard - staff interface (updated 2026-05-11)
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { QrCode, Users, AlertCircle } from 'lucide-react';
