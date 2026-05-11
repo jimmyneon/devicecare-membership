@@ -44,9 +44,9 @@ function LoginForm() {
       console.log('Member error:', memberError);
 
       if (memberError) {
-        // No member record - shouldn't happen, but redirect to complete profile
-        console.log('No member record found, redirecting to complete-profile');
-        router.push('/complete-profile');
+        // No member record - redirect to onboarding to create one
+        console.log('No member record found, redirecting to onboarding');
+        router.push('/onboarding');
       } else if (member && !member.profile_completed) {
         console.log('Profile not completed, redirecting to complete-profile');
         router.push('/complete-profile');
